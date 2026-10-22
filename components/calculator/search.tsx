@@ -1,16 +1,11 @@
 "use client";
 
 import { useState, useMemo, useRef } from "react";
-import { CALCULATORS } from "@/calculators/registry";
+import { SEARCH_INDEX } from "@/calculators/search-index";
 import Link from "next/link";
 import { cn } from "@/components/lib/cn";
 
-const INDEX = CALCULATORS.map((c) => ({
-  slug: c.slug,
-  name: c.name,
-  categoryLabel: c.categoryLabel,
-  haystack: `${c.name} ${c.slug} ${c.categoryLabel}`.toLowerCase(),
-}));
+const INDEX = SEARCH_INDEX;
 
 export function CalculatorSearch() {
   const [query, setQuery] = useState("");
