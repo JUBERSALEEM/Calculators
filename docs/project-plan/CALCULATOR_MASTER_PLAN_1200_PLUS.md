@@ -3741,6 +3741,28 @@ The build must fail if a calculator is routed/indexable without a `FormulaVerifi
 - Silently clamping or coercing invalid input into a valid-looking answer.
 - Hiding the jurisdiction behind a default (e.g. assuming US tax for everyone).
 
+### 9.6 Reference examples already reproduced from inspected sources
+
+These were computed independently while writing this plan and match the published examples in
+the inspected sources. They are the seed known-answer tests (T1) for the corresponding entries —
+they must be transcribed into the test suite, not re-derived from the implementation.
+
+| Entry | Input | Implementation result | Published value (source) |
+|---|---|---|---|
+| `heat-index` (CALC-0848) | T = 100 °F, RH = 55% | 123.6 °F | 124 °F (R-009 page example) |
+| `heat-index` | T = 100 °F, RH = 15% | 95.8 °F | 96 °F (R-009 page example) |
+| `wind-chill` (CALC-0847) | T = 0 °F, V = 15 mph | -19.4 °F | -19 °F (R-008 page example) |
+| `bmi` (CALC-0897) | 124 lb, 5 ft 9 in | 18.31 kg/m² (<18.5 → underweight) | "124 lb or less" is underweight (R-011) |
+| `bmi` | 169 lb, 5 ft 9 in | 24.95 kg/m² (not yet overweight) | "169 lb" begins overweight (R-011) |
+| `bmi` | 203 lb, 5 ft 9 in | 29.97 kg/m² (not yet obesity class 1) | "203 lb" begins obesity (R-011) |
+| `percentage-difference` (CALC-0003) | A = 100, B = 120 | 18.18% | Symmetric definition in F-ARI-02 |
+| `percentage-change` (CALC-0002) | A = 100, B = 120 | 20.00% | Relative-change definition in F-ARI-02 |
+
+The three BMI rows are instructive: each published threshold sits *just* above the computed
+value, which is what a correct unit constant (703 for lb/in²) and the correct inequality
+direction produce. Any implementation that returns 25.00 for 169 lb has a rounding or
+constant defect — this is exactly the kind of boundary test (T2) that catches it.
+
 ---
 
 ## 10. High-Risk Calculator Review Policy
@@ -4340,8 +4362,9 @@ Run before any release of this plan or of a batch. `A` = automated by
     check, slug-format regex, status-enum check, inputs→outputs non-empty check, minimum-count
     check (≥1,200), category-total reconciliation, and generation of `catalog.csv`.
     Manual verification performed: repository inventory (`git log`, `git status`, `ls`,
-    branch list), Markdown structure review, and hand-checking of the arithmetic in the worked
-    formula families against the inspected sources. **No calculator test suite exists yet**, and
+    branch list), Markdown structure review, Markdown table/anchor integrity checks (0 malformed
+    tables, 0 unresolved internal anchors), and independent reproduction of eight published
+    reference values from four inspected sources — recorded in §9.6. **No calculator test suite exists yet**, and
     none could exist — nothing is implemented.
 11. **Limitations, blockers, recommended next action.**
     - Only 13 sources were inspected; 4 research batches were completed out of roughly 20
