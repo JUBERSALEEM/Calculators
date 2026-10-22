@@ -27,7 +27,13 @@ export function Nav() {
             <span className="text-brand-600 dark:text-brand-400">Calc</span>ulators
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <Link href="/calculators" className="hidden md:inline text-sm text-neutral-700 dark:text-neutral-300 hover:text-brand-600 dark:hover:text-brand-400">
+              Directory
+            </Link>
+            <Link href="/categories/c01" className="hidden md:inline text-sm text-neutral-700 dark:text-neutral-300 hover:text-brand-600 dark:hover:text-brand-400">
+              Categories
+            </Link>
             <ThemeToggle />
 
             <button
@@ -72,13 +78,14 @@ export function Nav() {
           </h3>
           <div className="grid grid-cols-2 gap-3 text-sm">
             {categories.map((cat) => (
-              <button
+              <Link
                 key={cat.slug}
+                href={`/categories/${cat.slug}`}
                 onClick={closeMenu}
                 className="text-left px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300"
               >
                 {cat.label} <span className="text-neutral-400">({cat.count})</span>
-              </button>
+              </Link>
             ))}
           </div>
 

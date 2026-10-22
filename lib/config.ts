@@ -13,6 +13,8 @@ export const site = {
       : "http://localhost:3000",
 };
 
+export const SITE_URL = site.url;
+
 export const analytics = {
   // Google Analytics 4 measurement ID. Set via NEXT_PUBLIC_GA4_MEASUREMENT_ID.
   // Not committed; left undefined until the owner creates a GA4 property.

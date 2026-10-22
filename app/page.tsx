@@ -5,11 +5,11 @@ import { CalculatorCard } from "@/components/calculator/calculator-card";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Calculators — verified, privacy-first online calculators",
+  title: "Calculators — 1,248 documented, privacy-first calculators",
   description:
-    "Working calculators you can trust. Percentage change, BMI, wind chill, heat index, " +
-    "length conversion and more — formulas verified against authoritative sources. All " +
-    "calculations run in your browser.",
+    "Serving 1,248 working calculators across 84 categories — finance, health, engineering, " +
+    "science, trades and everyday maths. Every formula is documented with its assumptions " +
+    "and limitations, and every calculation runs in your browser.",
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
@@ -113,11 +113,14 @@ export default function HomePage() {
           Calculators you can verify
         </h1>
         <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-8 max-w-2xl mx-auto">
-          Working calculators with formulas checked against authoritative sources — NIST,
-          NOAA/NWS, CDC, and more. Every calculation runs in your browser; nothing is sent to
-          a server.
+          1,248 working calculators across 84 categories — finance, health, engineering,
+          science, trades and everyday maths. Each one documents its formula, assumptions and
+          limitations, and every calculation runs in your browser. Nothing is sent to a server.
         </p>
         <CalculatorSearch />
+        <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
+          Or open the <Link href="/calculators" className="text-brand-600 dark:text-brand-400 hover:underline">full directory</Link> of 1,248 calculators.
+        </p>
       </div>
 
       <Featured />

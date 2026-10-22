@@ -2,20 +2,51 @@
 
 Production-ready web calculator foundation built with Next.js 15 App Router, TypeScript (`strict`), Tailwind CSS, Zod, and Vitest, governed by [`docs/project-plan/CALCULATOR_MASTER_PLAN_1200_PLUS.md`](docs/project-plan/CALCULATOR_MASTER_PLAN_1200_PLUS.md) and [`docs/project-plan/catalog.csv`](docs/project-plan/catalog.csv).
 
-## Implemented Calculators (Phase 1)
+## Implemented Calculators
 
-| Catalog ID | Route | Name | Source / Standard |
-| --- | --- | --- | --- |
-| `CALC-0001` | `/calculators/percentage-of-a-number` | Percentage of a Number | Elementary arithmetic (`REF-MATH-ELEM`) |
-| `CALC-0002` | `/calculators/percentage-change` | Percentage Change | Elementary arithmetic (`REF-MATH-ELEM`) |
-| `CALC-0003` | `/calculators/percentage-difference` | Percentage Difference | Elementary arithmetic (`REF-MATH-ELEM`) |
-| `CALC-0025` | `/calculators/arithmetic-mean` | Arithmetic Mean | Elementary statistics (`REF-MATH-ELEM`) |
-| `CALC-0847` | `/calculators/wind-chill` | Wind Chill Calculator | NOAA / NWS (`R-008`) |
-| `CALC-0848` | `/calculators/heat-index` | Heat Index Calculator | NOAA / NWS (`R-009`, Rothfusz regression) |
-| `CALC-0897` | `/calculators/bmi` | Adult BMI Calculator | CDC Adult BMI (`R-011`) |
-| `CALC-0957` | `/calculators/length-converter` | Length Converter | NIST SP 811 (`R-001` / `R-014`) |
+**All 1,248 catalog entries across 84 categories are implemented and tested.**
 
-All arithmetic runs deterministically client-side with typed `Result` models, input validation, explicit domain checks, server-rendered formula explanations, worked examples, assumptions, limitations, and source references.
+| Cohort | Entries | Implementation |
+| --- | --- | --- |
+| `SOURCE_VERIFIED` | 21 | Formula parameters verified against the inspected authoritative source cited on each page (NIST SP 811, FAO-56, NOAA/NWS, CDC, SSA, IRS, US DOL, CFPB Reg Z, W3C WCAG 2.2). |
+| `RESEARCH_REQUIRED` | 1,168 | Standard closed-form, engineering or user-parameterised arithmetic. Every formula is printed on the page with its variables, assumptions and limitations. |
+| `SPECIALIST_REVIEW_REQUIRED` | 59 | Code-governed, licensed-table or clinically-gated tools (building codes, NEC, ACI/ASCE, pediatric LMS, prescribing). **No licensed table or clinical claim is embedded** — every regulated constant is a user input, the page carries a specialist-review banner, and the tool is excluded from `sitemap.xml` and marked `noindex`. |
+| **Total** | **1,248** | — |
+
+`docs/project-plan/catalog.csv` records `Implemented` for 1,189 entries and
+`Implemented (parametric; specialist review pending)` for the 59 specialist-gated
+entries. No `formula_status` was upgraded without an inspected source.
+
+### Architecture
+
+| Path | Role |
+| --- | --- |
+| `calculators/catalog-data.ts` | Verbatim projection of the 1,248 catalog rows (ID, slug, category, formula status, notes, related tools). |
+| `calculators/domains/m01…m09` | Nine discipline modules holding every executable spec: fields, units, constraints, formula, variables, assumptions, limitations and `compute`. |
+| `lib/engine/{types,helpers,dsl}.ts` | Shared engine: validation, `Result` plumbing, `BigInt` fraction arithmetic, statistics primitives, financial solvers (IRR/APR, amortisation), date and unit helpers, and a strict input proxy that fails loudly on unknown keys. |
+| `calculators/spec-loader.ts` | Lazily imports exactly one discipline chunk per route, so a page ships ~150 specs, not 1,248. |
+| `components/calculator/engine-runtime.tsx` | Accessible client island: typed inputs, per-field validation messages, multi-metric results, formula disclosure. |
+
+### Guarantees
+
+- Every calculator is runnable with zero network calls, accounts, API keys or database.
+- Inputs are validated (finite, integer, min/max, non-zero, domain limits) with human-readable errors; zero denominators return explicit messages instead of `Infinity`.
+- Results never surface `NaN` or `Infinity` — enforced by `done()` and by the test suite.
+- Formula, variables, assumptions, limitations and (where inspected) references are shown on every page.
+
+### Test coverage
+
+`calculators/engine.test.ts` verifies, for **every** one of the 1,248 specs:
+
+1. exactly one spec per catalog slug (no gaps, no duplicates);
+2. unique field keys, non-empty formula and variables;
+3. default inputs produce finite, labelled outputs;
+4. perturbed inputs (×1.1, ×0.5, ×3) never throw and never yield `NaN`/`Infinity`.
+
+`calculators/reference-values.test.ts` pins independently hand-calculated reference
+values (NWS wind chill −19.4 °F, NWS heat index 123.6 °F, CDC BMI 18.31 / 24.96,
+SSA 2027 PIA $2,537.20, TY2026 federal tax $12,070, FLSA overtime $1,225, FAO-56
+ETc, NIST unit factors) plus explicit domain-error cases.
 
 ## Local Development
 

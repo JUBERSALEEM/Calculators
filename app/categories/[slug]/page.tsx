@@ -15,10 +15,9 @@ export async function generateMetadata({
   const { slug } = await params;
   const category = getCategories().find((c) => c.slug === slug);
   if (!category) return {};
-  const calcs = getCalculatorsInCategory(category.slug.toUpperCase());
   return {
     title: `${category.label} calculators`,
-    description: `Browse ${calcs.length} verified ${category.label.toLowerCase()} calculators.`,
+    description: `All ${category.count} working ${category.label.toLowerCase()} calculators, each with its formula, assumptions and limitations documented.`,
     alternates: { canonical: `/categories/${slug}` },
   };
 }
@@ -32,56 +31,67 @@ export default async function CategoryPage({
   const category = getCategories().find((c) => c.slug === slug);
   if (!category) return notFound();
 
-  const calcs = getCalculatorsInCategory(category.slug.toUpperCase());
+  const calcs = getCalculatorsInCategory(category.code);
+  const index = getCategories().findIndex((c) => c.code === category.code);
+  const prev = index > 0 ? getCategories()[index - 1] : null;
+  const next = index < getCategories().length - 1 ? getCategories()[index + 1] : null;
 
   return (
     <div className="container-page">
-      <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+      <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
         <Link href="/" className="hover:text-brand-600 dark:hover:text-brand-400">
           Home
+        </Link>
+        <span>&rsaquo;</span>
+        <Link href="/calculators" className="hover:text-brand-600 dark:hover:text-brand-400">
+          Directory
         </Link>
         <span>&rsaquo;</span>
         <span className="text-neutral-900 dark:text-neutral-50">{category.label}</span>
       </nav>
 
-      <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-50 mb-2">
-        {category.label}
-      </h1>
+      <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-50 mb-2">{category.label}</h1>
       <p className="text-neutral-600 dark:text-neutral-400 mb-8">
-        {calcs.length} verified calculator{calcs.length !== 1 ? "s" : ""} in this category.
+        {calcs.length} calculator{calcs.length === 1 ? "" : "s"} in category {category.code}. Each runs entirely in
+        your browser and documents its formula and limits.
       </p>
 
-      {calcs.length === 0 ? (
-        <div className="rounded-calc p-10 border border-dashed border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900/50 text-center">
-          <p className="text-neutral-500 dark:text-neutral-400">
-            No calculators in this category yet.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {calcs.map((calc) => (
-            <article key={calc.slug} className="card">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="rounded-md brand-bg px-2 py-1 text-[10px] font-medium text-brand-600 dark:text-brand-400 uppercase tracking-tighter">
-                  {calc.intent}
-                </span>
-              </div>
-              <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-50 mb-2">
-                {calc.name}
-              </h3>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 line-clamp-2">
-                {calc.description}
-              </p>
-              <Link
-                href={`/calculators/${calc.slug}`}
-                className="btn-outline w-full text-center"
-              >
-                Open calculator
-              </Link>
-            </article>
-          ))}
-        </div>
-      )}
+      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        {calcs.map((calc) => (
+          <li key={calc.slug}>
+            <Link
+              href={`/calculators/${calc.slug}`}
+              className="block h-full rounded-calc border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 hover:border-brand-500 transition-colors"
+            >
+              <span className="block text-sm font-medium text-neutral-900 dark:text-neutral-50">{calc.name}</span>
+              <span className="mt-1 block text-xs text-neutral-500 dark:text-neutral-400">
+                {calc.formulaStatus === "SOURCE_VERIFIED"
+                  ? "Source verified"
+                  : calc.formulaStatus === "SPECIALIST_REVIEW_REQUIRED"
+                    ? "Specialist review required"
+                    : "Standard formula"}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-10 flex flex-wrap items-center justify-between gap-3 text-sm">
+        {prev ? (
+          <Link href={`/categories/${prev.slug}`} className="btn-outline">
+            ← {prev.label}
+          </Link>
+        ) : (
+          <span />
+        )}
+        {next ? (
+          <Link href={`/categories/${next.slug}`} className="btn-outline">
+            {next.label} →
+          </Link>
+        ) : (
+          <span />
+        )}
+      </div>
     </div>
   );
 }
