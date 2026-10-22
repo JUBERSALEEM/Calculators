@@ -272,75 +272,169 @@ Localisation is out of scope until the English catalog is stable (P3).
 
 ## 13. Recommended Technical Architecture
 
-> **Context:** the repository is greenfield (§3). Everything below is a **proposal**, chosen so
-> that it can be adopted incrementally and so that no calculator requires a server.
+> **Context:** the repository contains only `README.md` — no manifest, no framework, no CI, no
+> service credentials (§3). Every technology named in this section is **planned**, not present.
+> The stack itself is **confirmed by the project owner** (13.1); the design decisions that follow
+> are proposals for how to use it, and each carries an explicit "installed / configured?" status.
 
-### 13.1 Stack
+### 13.1 Decision record — confirmed stack
 
-| Layer | Recommendation | Why (and what it costs) |
+| Layer | Decision (confirmed) | Status in repository | Where the decision lives |
+|---|---|---|---|
+| Framework | **Next.js (App Router) + TypeScript**, strict mode | **Not present** — no `package.json` | This section; implement in wave W0 (§16.2) |
+| Styling | **Tailwind CSS** + a small design-token layer | **Not present** | §13.9, §14.5 |
+| Hosting | **Vercel** | **Not linked** — no project, no domain | §17 |
+| Backend/DB | **Supabase**, introduced only when a genuine need appears | **Not created** — no project, no keys | §13.5 (boundary + preconditions) |
+| Version control | **GitHub** (this repository) | Repository exists; **no CI workflows** | §15.2 |
+| Unit/calc tests | **Vitest** | **Not installed** | §15.1 |
+| Browser/E2E | **Playwright** | **Not installed** | §15.1 |
+| Validation | **Zod** | **Not installed** | §14.1 |
+| Analytics | **Google Analytics 4** | **No property, no tag** | §18.3 |
+| Search monitoring | **Google Search Console** | **Not verified** | §18.4 |
+| Advertising | **Google AdSense**, subject to eligibility and approval | **Not applied for** | §18.2 |
+
+### 13.2 Planned vs actually configured — the distinction this plan enforces
+
+Every future agent must be able to tell aspiration from reality. This table is the authoritative
+status list; it may only be changed by a commit that also records the configuration step taken.
+
+| Item | Planned | Configured / working today | Evidence required before changing the status |
+|---|---|---|---|
+| Next.js app scaffold | Yes | **No** | `package.json` with `next`, `app/layout.tsx` present, `npm run build` succeeds |
+| TypeScript strict | Yes | **No** | `tsconfig.json` with `"strict": true`, typecheck in CI |
+| Tailwind + tokens | Yes | **No** | `tailwind.config.ts`, tokens file, one page rendering |
+| Vitest | Yes | **No** | `vitest.config.ts`, at least one passing test in CI |
+| Playwright | Yes | **No** | `playwright.config.ts`, one passing E2E run in CI |
+| Zod | Yes | **No** | dependency + one schema used by a calculator |
+| GitHub Actions CI | Yes | **No** | `.github/workflows/ci.yml` green on a PR |
+| Vercel project | Yes | **No** | a preview deployment URL |
+| Custom domain | Yes | **No** | DNS record + HTTPS certificate |
+| Supabase project | **Only when needed** | **No** | a documented need (§13.5), a project, env vars, RLS policies |
+| GA4 property | Yes | **No** | measurement ID in env, consent-gated tag firing |
+| Search Console | Yes | **No** | verified ownership + sitemap submitted |
+| AdSense account/ads.txt | Later, after eligibility work | **No** | an approved account and a served `ads.txt` |
+| Any paid plan | Not authorised | **No** | explicit owner authorisation recorded in the PR |
+
+**Rule:** no row may move to "configured" in a planning document. Configuration is proven by code,
+config files or a live URL — never by a sentence in Markdown.
+
+### 13.3 Rendering strategy: static by default, server only when it earns its cost
+
+| Page type | Mode | Rationale |
 |---|---|---|
-| Framework | **Next.js (App Router) + TypeScript, strict mode** | Static generation for {{TOTAL}} pages, per-page metadata, image optimisation, ISR only where a data refresh is genuinely needed. Cost: framework churn — pin versions, upgrade deliberately. |
-| Rendering | **SSG by default**, ISR for time-sensitive data pages | No server for arithmetic. Server only for sitemap generation and (optionally) OG images. |
-| Styling | Tailwind CSS + a small design-token layer | Consistency across hundreds of pages without bespoke CSS per page. |
-| Components | Accessible primitives (native inputs, `fieldset`/`legend`, labels tied to inputs) | WCAG 2.2 AA is a requirement, not a nice-to-have (R-013). |
-| Numeric core | Pure TS modules; **decimal.js (or big.js) for money**; plain `number` for physical quantities | Money in binary floats produces 0.1+0.2 errors that surface as cents in amortisation tables. |
-| Validation | Zod schemas per calculator (input parse, range, unit) | One place to define inputs; feeds both the form and the tests. |
-| Unit handling | Shared unit registry with NIST-sourced factors (§23 R-014) | Prevents per-calculator factor drift; single point of audit. |
-| Tests | **Vitest** (unit/property) + **Playwright** (E2E, a11y via axe) | Fast unit feedback plus real-browser checks for the input/output path. |
-| Catalog | `catalog.csv`/typed registry generated from the same data that produced §8 | The plan and the site cannot diverge. |
-| CI | GitHub Actions: typecheck → lint → unit → build → Playwright → link/a11y checks | Every gate in §15 is automated except human review. |
-| Hosting | **Vercel** (or any static host) | Preview deploys per PR; negligible cost at low traffic (§17). |
-| Monitoring | Privacy-friendly analytics + error reporting (Sentry or equivalent) | Track real failures per calculator slug; no PII in events. |
+| Calculator page (arithmetic) | **SSG** (`generateStaticParams`) | Deterministic output at build time; no server needed; fastest TTFB and cheapest hosting. ~99% of the catalog is this shape. |
+| Category hub / home / index | **SSG** | Same content for every visitor. |
+| Static content (about, policies, methodology) | **SSG** (MDX) | Rarely changes; ships with the build. |
+| Sitemap, `robots.txt` | **Generated at build** | Must list only published slugs (§12.4) — generated from the same registry that renders pages. |
+| Time-sensitive data pages (e.g. FX rates, grid emission factors, carrier divisors) | **ISR with an explicit `revalidate`** and a visible "as of" timestamp | The *page* is static; only the *dataset* refreshes. Revalidation interval must match the data's actual update cadence, not a guess. |
+| Search results / filtered catalogue lists | **SSG + client filtering** | Filtering over an in-memory index; no server round-trip. |
+| Any future account area (saved calculations) | **SSR/dynamic** with Supabase session cookies | Only if §13.5's preconditions are met. |
+| OG images | **Static assets or edge-generated** | Cacheable; avoid regenerating per request. |
 
-### 13.2 Directory proposal
+Arithmetic never runs on the server: the calculation module is imported by a client island, so
+inputs stay in the browser (§18.5) and a Vercel function is never on the critical path.
+
+### 13.4 Component and route layout
 
 ```
 app/
-  (marketing)/page.tsx                  # home, category index
-  [category]/page.tsx                   # category hub
-  [category]/[slug]/page.tsx            # calculator page (SSG)
-  sitemap.ts, robots.ts
+  layout.tsx                     # fonts, tokens, consent banner, skip link
+  page.tsx                       # home + search
+  [category]/page.tsx            # category hub (SSG)
+  [category]/[slug]/page.tsx     # calculator page (SSG; ISR only for data pages)
+  sitemap.ts  robots.ts  manifest.ts
 components/
-  calculator/  CalculatorShell, Field, UnitSelect, ResultCard, WorkedExample, Limitations
-  ui/          Button, Tabs, Table, Disclosure
+  calculator/  CalculatorShell, NumberField, UnitField, ResultCard, RefusalNotice,
+               WorkedExample, Assumptions, References, RelatedTools
+  ui/          Button, Select, Table, Disclosure, Callout
 lib/
-  units/       registry.ts, convert.ts            # NIST-sourced factors only
-  money/       decimal.ts, rounding.ts            # half-up vs half-even explicit
+  units/       registry.ts (NIST-sourced factors), convert.ts
+  money/       decimal.ts, rounding.ts
   format/      number.ts, currency.ts, locale.ts
-  validation/  schema.ts
+  validation/  schema.ts (Zod helpers: positive, finite, range, required-unit)
+  analytics/   track.ts (consent-gated, no PII)
 calculators/
-  <slug>/
-    meta.ts            # FormulaVerification + SeoMeta + catalog fields
-    formula.ts         # pure function(s): inputs -> outputs, no React, no DOM
-    formula.test.ts    # T1-T6 cases
-    schema.ts          # Zod input/output schema
-    page.tsx
-    content.mdx        # explanation, worked example, FAQs, references
-registry.ts            # generated index of all calculators
+  <slug>/{meta.ts, formula.ts, formula.test.ts, schema.ts, page.tsx, content.mdx}
+registry.ts                      # generated index; feeds routes + sitemap
+tests/e2e/                       # Playwright
+supabase/                        # only when needed (§13.5)
 ```
 
-### 13.3 Which families need more than static arithmetic
+Server Components are the default; exactly one `"use client"` boundary per calculator (the
+interactive form/result island). No global state library, no data-fetching library — the catalog
+is a generated module, not a runtime API.
 
-| Family | Need | Implication |
+### 13.5 Supabase: the boundary, not the default
+
+**Use it only if all three hold:** (a) the feature needs state that must survive a device or user;
+(b) that state cannot be derived from the URL; (c) the privacy and operational cost is justified.
+Concrete triggers: saved/favourite calculations, user accounts, server-side API keys that must not
+ship to the browser (FX, irradiance), editorial workflow replacing MDX, aggregate feedback that
+needs a database.
+
+**Do not use it for:** arithmetic (client-side), the calculator catalog (versioned in git — a
+database here would silently diverge from the plan), page content (MDX + git review), analytics
+(GA4), or "just in case".
+
+If introduced, the non-negotiables are: RLS enabled on every table with policies written before
+any data exists; anon key only in the browser and never a service-role key; email/OTP auth rather
+than hand-rolled passwords; no calculation inputs stored by default (only an opt-in saved record);
+a documented schema in `supabase/migrations/`; free-tier limits noted in §17; and a written
+retention/deletion policy in the privacy page. Until those exist, any account feature stays
+unbuilt.
+
+### 13.6 Static generation at 1,248-page scale
+
+- **Build shape:** one route template + `generateStaticParams()` over the published registry.
+  Keep per-page JS small by importing only that calculator's module (no barrel imports of the
+  whole catalog into the client bundle).
+- **Build time control:** if the full build becomes slow, split by category (multiple build
+  invocations or Vercel "Ignored Build Step" per category folder) rather than degrading page
+  quality. Measure before optimising; record the number.
+- **Content colocation:** `content.mdx` per calculator keeps prose reviewable in git and
+  prevents a 1,248-page CMS migration later.
+- **Sitemap discipline:** generated from `status === "PUBLISHED"`; `noindex` for research-stage
+  pages; a build-time assertion fails if an unpublished slug appears in the sitemap.
+- **Link integrity:** a build step resolves every `related[]` slug and fails on a dangling link —
+  at this catalogue size, dead internal links are inevitable without automation.
+
+### 13.7 Performance and delivery budgets (per page, enforced in CI where measurable)
+
+| Metric | Budget | How it is protected |
 |---|---|---|
-| Tax, payroll, benefits (§C17, C18, C14) | Versioned rule tables per jurisdiction/year | Data files with `effectiveFrom`/`reviewBy`; build-time validation; annual update task (§19) |
-| Currency conversion (`currency-conversion`) | Live FX | Paid or free-tier API, cached daily, with a visible "as of" timestamp and a manual-rate fallback. Currently static-rate only. |
-| Solar yield (§C49), weather (`wind-chill` is static) | Irradiance/weather datasets | External API or offline TMY dataset; NREL PVWatts is the intended reference (ORQ-05). Adds a dependency and rate limits. |
-| Freight (`dimensional-weight`) | Carrier divisors change | User-editable divisor with cited defaults; never hard-coded silently |
-| Emissions (§C48) | Grid factors per country/year | Versioned dataset with source and year |
-| Mortgage/tax (§C11, C12, C17) | Jurisdiction rules | Per-jurisdiction modules; explicit "US only" labelling |
-| Structural/electrical (§C25, C27) | Licensed tables | Do **not** ship until licensed access and reviewer sign-off; consider not shipping at all |
+| JS shipped to a calculator page | ≤ 120 KB gzipped (target), hard cap 170 KB | No UI framework beyond React; no chart library on first paint; lazy-load anything >20 KB |
+| LCP (mobile, field) | < 2.5 s at p75 | Static HTML, system/1 font subset, no blocking third-party script |
+| INP | < 200 ms | Result updates are synchronous arithmetic; no layout thrash |
+| CLS | < 0.1 | Reserved ad slots, fixed result height, no late-injected banners |
+| Fonts | ≤ 2 families, subset, `font-display: swap`, self-hosted | Avoids third-party font round-trips |
+| Third-party scripts | Consent-gated, ≤ 1 analytics + ≤ 1 ad stack | GA4 and AdSense load only after consent where required |
+| Images | AVIF/WebP, explicit dimensions, lazy below the fold | Prevents CLS and over-fetch |
 
-### 13.4 Deliberately rejected
+Budgets are *targets set now*: they must be re-measured against real traffic in Search Console /
+CrUX and adjusted with evidence, not silently relaxed.
 
-- A backend/database for arithmetic. It adds cost, latency, attack surface and privacy exposure
-  for zero benefit.
-- Client-side-only rendering with no static content (bad for crawlers and for slow devices).
-- A single mega-component that branches on slug. Each calculator is a small pure module.
-- A shared "generic percentage" component reused for 40 different pages — that is exactly the
-  thin-content pattern we are avoiding.
+### 13.8 Scaling path
 
----
+| Stage | Trigger | Change |
+|---|---|---|
+| S1 Static site | Launch to ~10k visits/month | Vercel static hosting; no database |
+| S2 Data-refresh | Time-sensitive calculators need daily data | Scheduled job writes a JSON artefact; ISR revalidates; "as of" shown |
+| S3 Accounts | Users ask to save calculations | Introduce Supabase (13.5) with RLS and retention policy |
+| S4 i18n | Documented non-English demand | Route-based locales; translated UI + reviewed prose (never machine-translated formula text) |
+| S5 Catalogue growth past ~3,000 | Build times and review load both rise | Partition builds; require category owners; stricter automated gates |
+
+### 13.9 Deliberately rejected (and why)
+
+- **A backend for arithmetic.** Cost, latency, privacy exposure, zero benefit.
+- **Database-backed catalog.** The catalog is a reviewed artefact; git gives history, diffs and
+  rollback that a table does not.
+- **Client-rendered-only pages with no static content.** Bad for crawlers, slow devices and
+  First Contentful Paint.
+- **A CMS before the content stabilises.** MDX in git is cheaper and reviewable.
+- **Third-party calculator widgets.** They inject unknown scripts, harm CWV, and put the payload
+  and the ad stack in someone else's control.
+- **Supabase on day one.** An unused database is a standing security and privacy liability.
+- **A component-per-slug mega-switch.** Every calculator is a small pure module (§14).
 
 ## 14. Calculator Component and Formula Module Conventions
 
@@ -471,7 +565,8 @@ inspected source already exists.
 
 | Wave | Scope | Entry gate | Completion criteria |
 |---|---|---|---|
-| W0 | Foundation | this plan approved | Repo scaffolded; `lib/units`, `lib/money`, `lib/format`, `CalculatorShell`, CI with G1-G8, one P0 calculator end-to-end as the reference implementation |
+| W0 | Foundation | this plan approved; stack confirmed (§13.1) | Repo scaffolded with the confirmed stack (Next.js App Router + TS strict, Tailwind, Vitest, Playwright, Zod); `lib/units`, `lib/money`, `lib/format`, `CalculatorShell`; CI with G1-G8; **no** database, analytics or ad code yet; one P0 calculator end-to-end as the reference implementation |
+| W0b | Measurement setup | W0 green | Vercel project + preview deploys (owner authorisation), GA4 property with consent-gated tag, Search Console verification and first sitemap submission. Supabase remains unbuilt. AdSense application only after §18.2's eligibility checklist passes |
 | W1 | First 50-100 calculators | W0 done | All W1 calculators `TESTED`; sitemap generated; Lighthouse mobile ≥90 on the 5 heaviest pages; no `noindex` leaks |
 | W2 | General-purpose categories (C01-C09, C60-C61) | W1 done | Category hubs live; internal link graph complete; math families verified against inspected textbooks |
 | W3 | Finance and business (C10-C22) | W2 done + data tables for the supported jurisdiction | Every tax/APR/benefit page shows effective date + source; APR implements Reg Z Appendix J; PIA matches SSA example |
@@ -492,57 +587,99 @@ at **Cataloged**, and at most `Researched` where a family block exists. Nothing 
 
 ## 17. Hosting and Operating Cost Considerations
 
-| Item | Low-cost approach | Scaling note |
-|---|---|---|
-| Hosting | Vercel Hobby/Pro or a static host (Cloudflare Pages, Netlify) | Static pages scale with CDN; cost grows with bandwidth, not CPU |
-| Compute | None for arithmetic — all client-side | Only ISR/OG-image functions are server-side |
-| Data | JSON/TS tables in-repo, versioned | A DB is needed only if user accounts or saved calculations are added (not planned) |
-| External APIs | Avoid initially; add only where the calculation genuinely needs live data (FX, irradiance) with caching and a manual fallback | Each API is a cost, a rate limit, an outage mode and a privacy question |
-| CI | GitHub Actions free tier | Watch minutes; Playwright shards if slow |
-| Monitoring | Privacy-friendly analytics + error tracking free tiers | Per-slug error dashboards drive maintenance |
-| Backups | Git is the source of truth; content in MDX | Add off-repo snapshots only if a CMS is introduced |
+> No service is configured today (§13.2). Figures below are **structural expectations, not
+> quotes**; vendor pricing changes and must be verified before any commitment. No paid plan may be
+> purchased without explicit authorisation.
 
-Cost drivers to watch: bandwidth from heavy ad scripts (§18), image/OG generation, and any
-external API. Deliberately excluded: a database, a search service (static index suffices), and
-per-calculation server calls.
+| Item | Planned approach | Cost shape | Notes / risks |
+|---|---|---|---|
+| Hosting | Vercel, static-first | Free/entry tier likely sufficient initially; scales with bandwidth and function invocations | Only data-refresh functions and optional OG generation consume invocations |
+| Compute | None for arithmetic | £0 | Calculations run in the browser by design |
+| Database | Supabase, only when §13.5 is satisfied | Free tier has row/storage/bandwidth caps; paused projects on inactivity are a real operational surprise | Budget for a paid tier only when a feature genuinely depends on it |
+| Content | MDX + git | £0 | Reviewable; no CMS licence |
+| CI | GitHub Actions | Free minutes on public repos; watch Playwright runtime | Shard E2E if the suite exceeds the free allowance |
+| Analytics | GA4 | Free; data-retention limits apply | Consent management is a legal cost, not a licence cost (§18) |
+| Search monitoring | Search Console | Free | Requires domain verification |
+| Advertising | AdSense | Revenue share, not a cost — but approval is not guaranteed | Ad scripts add bytes and CWV risk (§18.6) |
+| Domain / TLS | Registrar + managed certificate | Small annual fee | Not purchased in this task |
 
----
+**Cost drivers to watch:** ad-stack weight (the main CWV and bandwidth risk), image/OG generation,
+any external API (per-call pricing and rate limits), and Supabase growth if accounts ship.
+**Deliberately excluded from the architecture:** a database on day one, a search service (a static
+index suffices), server-side rendering of arithmetic, and per-calculation API calls.
 
 ## 18. Advertising and Privacy Readiness
 
+> Status: **nothing is configured.** No GA4 property, no Search Console verification, no AdSense
+> application, no consent platform. Everything here is a requirement set for the implementation
+> waves, not a description of the current site.
+
 ### 18.1 Policy alignment (inspected evidence)
 
-Google's "misleading functionality" policy (R-005) names sites that claim a tool but route users
-to deceptive ads. Therefore: **the calculator must be fully functional before any ad loads**,
-and an ad must never occupy the position of the result or intercept input.
+Google's "misleading functionality" spam policy (R-005, §23) names sites that advertise a tool but
+route users to deceptive ads. The binding consequence for this project: **the calculator must be
+fully functional before any ad loads**, an ad may never occupy the result position, and no
+interstitial may delay the tool.
 
-### 18.2 Requirements
+### 18.2 Google AdSense — preconditions before any code
 
-1. **Consent management** for EEA/UK (GDPR/ePrivacy) and other opt-in jurisdictions; no
-   non-essential cookies before consent; consent state readable by the ad layer.
-2. **Privacy policy + cookie policy + terms + disclaimer** pages, linked in the footer and in
-   the calculator result area where the output could be mistaken for advice.
-3. **No personal data in calculations** — inputs never leave the browser; no logging of raw
-   input values. Analytics events are aggregate and slug-level.
-4. **Ad placement**: below the result and after the explanation; never between H1 and the
-   inputs; never sticky-over the mobile keyboard; no interstitials; no auto-playing video.
-5. **Core Web Vitals protection**: lazy-load all ad slots, reserve space (no layout shift),
-   cap total ad bytes, and exclude ad scripts from the critical path.
-6. **Sensitive contexts**: no ads on clinical (`C59`), legal (`C76`) and bereavement/financial-
-   hardship pages beyond a single standard slot; consider no ads at all there.
-7. **No incentive to click**: no fake buttons, no "download results" gates, no obscured
-   "calculate" controls.
-8. **Children's content**: none planned; if added, no behavioural advertising.
-9. **Ad-network policies** are external and can change; compliance is a recurring review item,
-   not a one-time setting. No claim is made that any site built from this plan will be approved.
+1. **Eligibility work first:** original, useful content; real pages (not placeholders); privacy
+   policy, cookie policy, terms, disclaimer, contact page; clear navigation. Approval is
+   Google's decision — this plan makes **no** claim that a site built from it will be accepted.
+2. **`ads.txt`** served at the domain root with the publisher ID once (and only once) an account
+   exists.
+3. **Ad placement rules:** below the result and after the explanation; never between the `H1` and
+   the inputs; never sticky over the mobile keyboard; no auto-play video; no "download the result"
+   gates; no ads that mimic calculator controls.
+4. **Sensitive pages:** no ads on clinical (`C59`), legal (`C76`) or hardship-related pages
+   (debt, benefits). If monetisation is wanted there later, it requires a separate policy review.
+5. **Invalid-traffic protection:** no incentives to click, no automated refreshes, no ad reload on
+   input change.
+6. **Policy drift:** ad-network policies change; compliance is a recurring review item (§19), not
+   a one-off setting.
 
-### 18.3 Analytics
+### 18.3 Google Analytics 4
 
-Privacy-first (e.g. Plausible/Umami or GA4 with consent mode): page views, calculator
-engagement (a calculation was performed), refusals (invalid input), and error events. **No**
-input values, no per-user profiles, no cross-site identifiers.
+- Measurement ID supplied by environment variable; **no ID committed to the repository**.
+- Consent-gated: no analytics cookies before consent in opt-in jurisdictions; GA4 **Consent Mode**
+  signals (`analytics_storage`, `ad_storage`, `ad_user_data`, `ad_personalization`) wired to the
+  consent banner.
+- Events are **aggregate and slug-level only**: page view, `calculator_used`, `input_refused`,
+  `error`. Never the input values, never free-text, never a user identifier.
+- Data retention configured to the shortest period that still answers product questions.
+- GA4 is an enhancement, not a dependency: the site must work with analytics blocked.
 
----
+### 18.4 Google Search Console
+
+- Domain verification (DNS or HTML file) recorded in the repository only as a value, never as a
+  secret.
+- `sitemap.xml` submitted; coverage monitored; a recurring task reviews "Crawled – not indexed"
+  for thin-content signals (§12.3) and "Soft 404" for retired tools (§19.2).
+- Core Web Vitals and mobile-usability reports feed the §13.7 budgets.
+
+### 18.5 Privacy architecture
+
+- **Inputs never leave the browser.** No calculation payload is sent to a server, logged, or
+  attached to an analytics event. This is a design property, not a policy promise: the arithmetic
+  module is client-side and has no network access.
+- No accounts on day one; if Supabase is introduced (§13.5), data minimisation, RLS, and a written
+  retention/deletion policy are preconditions.
+- Privacy policy, cookie policy, terms and a per-domain disclaimer (medical/legal/financial/
+  engineering) are launch blockers, not afterthoughts.
+- A visible "how this calculator works and what it cannot do" block on every high-risk page.
+
+### 18.6 Advertising effect on performance and trust
+
+Ad slots are **reserved** with fixed height (CLS = 0 contribution), lazy-loaded, and capped in
+number. If field data shows ads pushing LCP/INP beyond budget, the ad configuration changes — not
+the budget. A page whose tool is degraded by monetisation fails the §15.3 gate regardless of
+revenue.
+
+### 18.7 Children and sensitive data
+
+No child-directed content is planned. No behavioural advertising on pages concerning health,
+finance hardship, or legal entitlement. If any such page is added, ad serving is disabled there by
+default.
 
 ## 19. Maintenance and Versioning Policy
 
@@ -687,7 +824,14 @@ Run before any release of this plan or of a batch. `A` = automated by
    beyond US federal TY2026, `C18` payroll, `C23` construction quantities, `C25` structural,
    `C27`/`C34` electrical and glazing, `C49` solar, `C57` nutrition, `C59` clinical, `C73`
    quality standards, `C76` legal, `C82` pets.
-10. **Tests / automated audits actually run** —
+10. **Technology and configuration status** — stack **confirmed by the owner**: Next.js
+    App Router + TypeScript, Tailwind CSS, Vercel, Supabase (when needed), GitHub, Vitest,
+    Playwright, Zod, GA4, Search Console, AdSense (subject to approval). **Configured and
+    working: none of it.** No `package.json`, no dependencies installed, no Vercel project, no
+    Supabase project, no CI workflow, no GA4 property, no Search Console verification, no AdSense
+    account, and no paid service enabled. The planned-vs-configured matrix in §13.2 is the
+    authoritative status list, and each row names the evidence required before it may change.
+11. **Tests / automated audits actually run** —
     `tools/build_master_plan.py` on every build: unique ID check, unique slug check, unique name
     check, slug-format regex, status-enum check, inputs→outputs non-empty check, minimum-count
     check (≥1,200), category-total reconciliation, and generation of `catalog.csv`.
@@ -696,7 +840,7 @@ Run before any release of this plan or of a batch. `A` = automated by
     tables, 0 unresolved internal anchors), and independent reproduction of eight published
     reference values from four inspected sources — recorded in §9.6. **No calculator test suite exists yet**, and
     none could exist — nothing is implemented.
-11. **Limitations, blockers, recommended next action.**
+12. **Limitations, blockers, recommended next action.**
     - Only 13 sources were inspected; 4 research batches were completed out of roughly 20
       planned subject areas. NREL pages were unreachable; FAO equations are images in the HTML;
       NIST's factor table is only partially transcribed. All three are recorded as open items.
@@ -705,8 +849,9 @@ Run before any release of this plan or of a batch. `A` = automated by
       and quality categories.
     - No keyword data was consulted, so priorities are structural judgements and are labelled as
       such; they should be re-ranked once a licensed dataset is available.
-    - **Recommended next action:** approve §13's architecture, build the W0 foundation with CI
-      gates G1-G8 and one reference calculator implemented end-to-end (suggested:
+    - **Recommended next action:** approve §13's architecture, then build the W0 foundation in
+      the confirmed stack with CI gates G1-G8 and one reference calculator implemented end-to-end
+      (suggested:
       `percentage-change`, `loan-payment`, `length-converter` as three distinct shapes — simple,
       money, unit-based), then start the research batches that unblock the P0/P1 cohorts before
       writing more calculators. Do not commission bulk implementation until at least one

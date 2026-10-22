@@ -74,6 +74,15 @@ entries at `SOURCE_VERIFIED` and inform dozens more partly. **{{RESEARCH}} entri
 **{{SPECIALIST}} are `SPECIALIST_REVIEW_REQUIRED`** because they depend on licensed standards,
 clinical judgement or legal rules that no calculator should present as settled truth.
 
+**The technology stack is confirmed; nothing is configured.** The owner has fixed the stack:
+Next.js (App Router) + TypeScript, Tailwind CSS, Vercel, Supabase (only when genuinely required),
+GitHub, Vitest, Playwright, Zod, Google Analytics 4, Google Search Console and Google AdSense
+(subject to eligibility and approval). §13 records these as decisions, and §13.2 maintains an
+explicit **planned vs actually configured** table. At the time of writing the repository contains
+only `README.md`: there is no `package.json`, no framework, no test runner, no CI workflow, no
+Vercel project, no Supabase project, no GA4 property, no Search Console verification and no
+AdSense account. This document plans; it does not configure.
+
 **What must not be claimed.** No search volume, keyword difficulty, traffic forecast or revenue
 estimate appears anywhere in this document. No ranking, indexing or ad-approval outcome is
 promised. No entry is marked `IMPLEMENTED`, `TESTED` or `PUBLISHED`. No calculator is described
@@ -101,6 +110,7 @@ nothing until §15's gate passes for that specific entry.
 | O6 | Low running cost with a clear scaling path | Static-first hosting; no server needed for arithmetic (§17) |
 | O7 | Maintainable by successive agents without prior context | Catalog as data, conventions in §14, changelog in §19 |
 | O8 | Compliant, non-deceptive monetisation | Ad policy in §18; no ad-induced degradation of the tool |
+| O9 | Use the confirmed stack, without premature services | §13.1 records the decisions; §13.2 proves what is (not) configured; Supabase stays optional until §13.5's preconditions are met |
 
 ### 2.2 Non-goals
 
@@ -112,6 +122,10 @@ nothing until §15's gate passes for that specific entry.
 - **Not** a brand, domain, logo or copy deck.
 - **Not** a multilingual plan beyond stating that slugs and content must be localisable (§12.6).
 - **Not** an affiliate/ad network application. Rates, approval and policy are outside our control.
+- **Not** a service-configuration task: no Vercel project, Supabase project, GA4 property, Search
+  Console verification or AdSense account is created here, and no paid plan is purchased. Adding
+  a dependency or service requires a stated need in §13.5 or §17 and explicit owner authorisation.
+- **Not** a UI implementation. No component, page or style is written in this task.
 
 ---
 
@@ -146,6 +160,17 @@ Inspected before creating anything, as required.
    review in §11 is internal to this catalog.
 4. Because there is no coding standard, §14 defines one. Because there is no test
    infrastructure, §15 defines it. Both are proposals for the first implementation batch.
+
+### 3.1 Re-inspection at stack-confirmation time
+
+The repository was re-inspected when the technology stack was confirmed (same day, second pass):
+`README.md` is unchanged (`# Calculators`, 13 bytes); there is still **no** `package.json`,
+lockfile, `tsconfig.json`, `next.config.*`, `tailwind.config.*`, `vitest.config.*`,
+`playwright.config.*`, `supabase/` directory, `.github/workflows/`, or Vercel/GA4/AdSense
+configuration of any kind. The only change in the working tree is the planning directory created
+by this task (§3, table above). The master plan was therefore **updated in place** — architecture,
+hosting and advertising sections were rewritten to match the confirmed stack — rather than
+duplicated into a second file.
 
 **Files created by this task** (no other file was modified):
 
