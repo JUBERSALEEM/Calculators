@@ -12,6 +12,8 @@ export interface RoadmapPhase {
   scope: string[];
   /** Estimated number of calculators this phase adds (planning target). */
   targetAdded: number | null;
+  /** Calculators actually added so far in this phase (kept in step with the catalog CSV). */
+  addedSoFar: number;
   /** Acceptance gate every calculator in this phase must pass before it is marked verified. */
   gate: string;
 }
@@ -29,6 +31,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
     goal: "Planned catalog of 1,248 calculators across 84 categories, with formula status for every entry.",
     scope: ["84 categories (C01–C84)", "21 source-verified entries", "59 specialist-review entries (kept gated)"],
     targetAdded: 1248,
+    addedSoFar: 1248,
     gate: "Catalog generated from docs/project-plan/tools/catalog_source.py; coverage test passes.",
   },
   {
@@ -44,6 +47,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
       "Jaccard and Sørensen community similarity",
     ],
     targetAdded: 6,
+    addedSoFar: 6,
     gate: ENTRY_GATE,
   },
   {
@@ -58,6 +62,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
       "Animal energy: maintenance energy requirement (published equations, cited)",
     ],
     targetAdded: 150,
+    addedSoFar: 16,
     gate: ENTRY_GATE + " Animal dosing or clinical use is out of scope: those become SPECIALIST_REVIEW_REQUIRED.",
   },
   {
@@ -67,6 +72,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
     goal: "Give known-answer tests to every RESEARCH_REQUIRED entry with a closed-form formula, starting with mathematics, statistics and finance (C01–C16).",
     scope: ["Mathematics and statistics (m01, m02)", "Finance and accounting (m03, m04)", "Engineering formulas (m05, m06)"],
     targetAdded: null,
+    addedSoFar: 0,
     gate: ENTRY_GATE + " Entries that cannot meet the gate keep Smoke-tested status and are listed in the plan.",
   },
   {
@@ -80,6 +86,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
       "Ecology, environmental and everyday calculators not yet covered",
     ],
     targetAdded: 2700,
+    addedSoFar: 0,
     gate: ENTRY_GATE + " Each variant states how it differs from its base calculator.",
   },
   {
@@ -89,6 +96,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
     goal: "Keep building-code, clinical, statutory and licensed-table calculators behind a specialist review. They are never marked verified without licensed data and sign-off.",
     scope: ["59 specialist-review entries", "Excluded from the sitemap and marked noindex"],
     targetAdded: null,
+    addedSoFar: 0,
     gate: "Licensed source and qualified reviewer sign-off recorded in the catalog; otherwise the tool stays flagged.",
   },
 ];

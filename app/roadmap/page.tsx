@@ -29,6 +29,7 @@ export default function RoadmapPage() {
   const counts = verificationCounts();
   const categories = getCategories().length;
   const implementedPct = pct(CALCULATORS.length, EXPANSION_TARGET_TOTAL);
+  const balance = Math.max(0, EXPANSION_TARGET_TOTAL - CALCULATORS.length);
   const verifiedPct = pct(counts.verified, CALCULATORS.length);
 
   return (
@@ -48,6 +49,9 @@ export default function RoadmapPage() {
           </p>
           <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
             across {categories} categories · {implementedPct}% of the {EXPANSION_TARGET_TOTAL.toLocaleString("en-US")} target
+          </p>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Balance to target: {balance.toLocaleString("en-US")} calculators
           </p>
           <div className="mt-3 h-2 rounded bg-neutral-200 dark:bg-neutral-800" role="progressbar" aria-valuenow={implementedPct} aria-valuemin={0} aria-valuemax={100} aria-label="Progress toward the target size">
             <div className="h-2 rounded bg-brand-600" style={{ width: `${implementedPct}%` }} />
@@ -83,7 +87,7 @@ export default function RoadmapPage() {
               </span>
               {p.targetAdded !== null && (
                 <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                  Planned additions: {p.targetAdded.toLocaleString("en-US")}
+                  Added {p.addedSoFar.toLocaleString("en-US")} of {p.targetAdded.toLocaleString("en-US")} planned
                 </span>
               )}
             </div>

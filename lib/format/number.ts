@@ -16,7 +16,9 @@ export function formatNumber(value: number, maxDecimals = 4): string {
   if (!Number.isFinite(value)) {
     throw new Error("cannot format non-finite value");
   }
-  return new Intl.NumberFormat("en-US", formatOptions(maxDecimals)).format(value);
+  const text = new Intl.NumberFormat("en-US", formatOptions(maxDecimals)).format(value);
+  // Negative zero (−0, or a tiny negative that rounds to zero) must not display as "-0".
+  return text === "-0" ? "0" : text;
 }
 
 /**
