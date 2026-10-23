@@ -26,3 +26,19 @@ describe("percentageDifference (CALC-0003)", () => {
     expect(r.ok).toBe(false);
   });
 });
+
+describe("percentage difference — audited sign handling", () => {
+  it("100 and 120 give 18.18%", () => {
+    const r = percentageDifference({ a: 100, b: 120 });
+    expect(r.ok && r.value.differencePct).toBeCloseTo(18.18, 2);
+  });
+
+  it("is non-negative for negative inputs: -100 and -120 give 18.18%", () => {
+    const r = percentageDifference({ a: -100, b: -120 });
+    expect(r.ok && r.value.differencePct).toBeCloseTo(18.18, 2);
+  });
+
+  it("returns an error when the mean is zero", () => {
+    expect(percentageDifference({ a: 5, b: -5 }).ok).toBe(false);
+  });
+});
