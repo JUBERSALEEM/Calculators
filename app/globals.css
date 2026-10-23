@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Design tokens
+   The palette is a warm paper/ink pairing with a single vermilion accent, so
+   numbers and results read like marks on technical paper. Dark mode inverts to
+   a cool near-black instrument panel. Every colour is defined once here and
+   consumed through Tailwind utilities (bg-surface, text-ink, border-line, ...).
+--------------------------------------------------------------------------- */
+:root {
+  --paper: #f7f5f0;
+  --paper-deep: #eeebe3;
+  --surface: #fffefb;
+  --surface-raised: #ffffff;
+  --ink: #14171a;
+  --ink-soft: #3d444a;
+  --muted: #646c73;
+  --line: #ddd8cd;
+  --line-strong: #c9c2b4;
+  --accent: #b8401c;
+  --accent-hover: #9c3415;
+  --accent-soft: #fbe9e1;
+  --accent-ink: #8c2f13;
+  --positive: #14603f;
+  --positive-soft: #e4f1e9;
+  --caution: #8a5a00;
+  --caution-soft: #fcf0d8;
+  --danger: #a32219;
+  --danger-soft: #fbe6e3;
+  --focus: #1b4f9c;
+  --shadow: 0 1px 2px rgb(20 23 26 / 6%), 0 8px 24px -12px rgb(20 23 26 / 18%);
+  --grid: rgb(20 23 26 / 5%);
+}
+
+.dark {
+  --paper: #0d0f11;
+  --paper-deep: #090b0c;
+  --surface: #16191c;
+  --surface-raised: #1c2024;
+  --ink: #eef0f1;
+  --ink-soft: #c3c8cc;
+  --muted: #929aa1;
+  --line: #2a2f34;
+  --line-strong: #3a4147;
+  --accent: #ff7a45;
+  --accent-hover: #ff8f62;
+  --accent-soft: #2c1a12;
+  --accent-ink: #ffb08c;
+  --positive: #6fd6a2;
+  --positive-soft: #10241a;
+  --caution: #e9b949;
+  --caution-soft: #241d0d;
+  --danger: #ff8a7e;
+  --danger-soft: #2a1210;
+  --focus: #7fb0ff;
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 12px 32px -16px rgb(0 0 0 / 70%);
+  --grid: rgb(255 255 255 / 5%);
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-positive: var(--positive);
+  --color-positive-soft: var(--positive-soft);
+  --color-caution: var(--caution);
+  --color-caution-soft: var(--caution-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-focus: var(--focus);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --radius-card: 0.75rem;
+  --radius-control: 0.5rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+* {
+  border-color: var(--line);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+/* Focus ring: visible on every interactive element, never removed. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  left: 0.75rem;
+  top: 0.75rem;
+}
+
+/* Blueprint grid used behind the hero — pure CSS, no image request. */
+.grid-paper {
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+}
+
+/* Tabular figures keep aligned columns of numbers from jittering. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Long formula strings must never force a horizontal scrollbar. */
+.formula {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
