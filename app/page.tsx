@@ -1,13 +1,13 @@
 import { CalculatorMeta } from "@/calculators/registry";
-import { CALCULATORS, getCalculatorSlugs } from "@/calculators/registry";
+import { CALCULATORS, TOTAL_CATEGORIES, TOTAL_LABEL, getCalculatorSlugs } from "@/calculators/registry";
 import { CalculatorSearch } from "@/components/calculator/search";
 import { CalculatorCard } from "@/components/calculator/calculator-card";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Calculators — 1,248 documented, privacy-first calculators",
+  title: `Calculators — ${TOTAL_LABEL} documented, privacy-first calculators`,
   description:
-    "Serving 1,248 working calculators across 84 categories — finance, health, engineering, " +
+    `Serving ${TOTAL_LABEL} working calculators across ${TOTAL_CATEGORIES} categories — finance, health, engineering, ` +
     "science, trades and everyday maths. Every formula is documented with its assumptions " +
     "and limitations, and every calculation runs in your browser.",
   alternates: { canonical: "/" },
@@ -113,13 +113,13 @@ export default function HomePage() {
           Calculators you can verify
         </h1>
         <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-8 max-w-2xl mx-auto">
-          1,248 working calculators across 84 categories — finance, health, engineering,
+          {TOTAL_LABEL} working calculators across {TOTAL_CATEGORIES} categories — finance, health, engineering,
           science, trades and everyday maths. Each one documents its formula, assumptions and
           limitations, and every calculation runs in your browser. Nothing is sent to a server.
         </p>
         <CalculatorSearch />
         <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
-          Or open the <Link href="/calculators" className="text-brand-600 dark:text-brand-400 hover:underline">full directory</Link> of 1,248 calculators.
+          Or open the <Link href="/calculators" className="text-brand-600 dark:text-brand-400 hover:underline">full directory</Link> of {TOTAL_LABEL} calculators.
         </p>
       </div>
 

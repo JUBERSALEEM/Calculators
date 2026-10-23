@@ -4,16 +4,16 @@ Production-ready web calculator foundation built with Next.js 15 App Router, Typ
 
 ## Implemented Calculators
 
-**All 1,248 catalog entries across 84 categories are implemented.** 58 are independently verified by known-answer tests (`calculators/reference-values.test.ts`, `calculators/known-answers-*.test.ts`), including all 21 source-verified entries; the other entries are smoke-tested (defaults and perturbed inputs produce finite, labelled results) but their formulas have not yet been checked against independent reference values.
+**All 1,254 catalog entries across 84 categories are implemented** (1,248 baseline plus 6 from the first expansion batch; see `docs/project-plan/EXPANSION_PLAN.md` and the live `/roadmap` page). 64 are independently verified by known-answer tests (`calculators/reference-values.test.ts`, `calculators/known-answers-*.test.ts`, `calculators/known-answers-expansion.test.ts`), including all 21 source-verified entries; the other entries are smoke-tested (defaults and perturbed inputs produce finite, labelled results) but their formulas have not yet been checked against independent reference values.
 
 | Cohort | Entries | Implementation |
 | --- | --- | --- |
 | `SOURCE_VERIFIED` | 21 | Formula parameters verified against the inspected authoritative source cited on each page (NIST SP 811, FAO-56, NOAA/NWS, CDC, SSA, IRS, US DOL, CFPB Reg Z, W3C WCAG 2.2). |
-| `RESEARCH_REQUIRED` | 1,168 | Standard closed-form, engineering or user-parameterised arithmetic. Every formula is printed on the page with its variables, assumptions and limitations. |
+| `RESEARCH_REQUIRED` | 1,174 | Standard closed-form, engineering or user-parameterised arithmetic. Every formula is printed on the page with its variables, assumptions and limitations. |
 | `SPECIALIST_REVIEW_REQUIRED` | 59 | Code-governed, licensed-table or clinically-gated tools (building codes, NEC, ACI/ASCE, pediatric LMS, prescribing). **No licensed table or clinical claim is embedded** — every regulated constant is a user input, the page carries a specialist-review banner, and the tool is excluded from `sitemap.xml` and marked `noindex`. |
-| **Total** | **1,248** | — |
+| **Total** | **1,254** | — |
 
-`docs/project-plan/catalog.csv` records `Verified (known-answer tested)` for 58 entries, `Implemented (smoke-tested; formula not independently verified)` for 1,131 entries, and
+`docs/project-plan/catalog.csv` records `Verified (known-answer tested)` for 64 entries, `Implemented (smoke-tested; formula not independently verified)` for 1,131 entries, and
 `Implemented (parametric; specialist review pending)` for the 59 specialist-gated
 entries. No `formula_status` was upgraded without an inspected source.
 
@@ -21,7 +21,7 @@ entries. No `formula_status` was upgraded without an inspected source.
 
 | Path | Role |
 | --- | --- |
-| `calculators/catalog-data.ts` | Verbatim projection of the 1,248 catalog rows (ID, slug, category, formula status, notes, related tools). |
+| `calculators/catalog-data.ts` | Verbatim projection of the 1,248 baseline catalog rows; expansion rows are in `calculators/expansion/` (ID, slug, category, formula status, notes, related tools). |
 | `calculators/domains/m01…m09` | Nine discipline modules holding every executable spec: fields, units, constraints, formula, variables, assumptions, limitations and `compute`. |
 | `lib/engine/{types,helpers,dsl}.ts` | Shared engine: validation, `Result` plumbing, `BigInt` fraction arithmetic, statistics primitives, financial solvers (IRR/APR, amortisation), date and unit helpers, and a strict input proxy that fails loudly on unknown keys. |
 | `calculators/spec-loader.ts` | Lazily imports exactly one discipline chunk per route, so a page ships ~150 specs, not 1,248. |
@@ -36,7 +36,7 @@ entries. No `formula_status` was upgraded without an inspected source.
 
 ### Test coverage
 
-`calculators/engine.test.ts` verifies, for **every** one of the 1,248 specs:
+`calculators/engine.test.ts` verifies, for **every** one of the 1,254 specs:
 
 1. exactly one spec per catalog slug (no gaps, no duplicates);
 2. unique field keys, non-empty formula and variables;

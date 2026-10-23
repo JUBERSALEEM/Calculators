@@ -1,21 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { ALL_SPECS } from "@/calculators/specs-all";
-import { CALCULATORS } from "@/calculators/registry";
+import { ALL_ENTRIES, CALCULATORS } from "@/calculators/registry";
 import { getDefaultRawInputs, validateAndRun } from "@/lib/engine/helpers";
-import { CATALOG_ENTRIES } from "@/calculators/catalog-data";
 
 describe("calculator engine coverage", () => {
   it("implements exactly one spec per catalog slug", () => {
     const slugs = ALL_SPECS.map((s) => s.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
-    const catalogSlugs = new Set(CATALOG_ENTRIES.map((e) => e.slug));
+    const catalogSlugs = new Set(ALL_ENTRIES.map((e) => e.slug));
     const missing = [...catalogSlugs].filter((s) => !slugs.includes(s));
     const extra = slugs.filter((s) => !catalogSlugs.has(s));
     expect({ missing, extra }).toEqual({ missing: [], extra: [] });
   });
 
   it("projects every catalog row into the public registry", () => {
-    expect(CALCULATORS.length).toBe(CATALOG_ENTRIES.length);
+    expect(CALCULATORS.length).toBe(ALL_ENTRIES.length);
   });
 });
 
@@ -98,13 +97,13 @@ describe("lazy domain grouping", () => {
     const { loadSpecGroup } = await import("@/calculators/spec-loader");
     const byGroup = new Map<number, Set<string>>();
     const groups = new Set<number>();
-    for (const entry of CATALOG_ENTRIES) groups.add(groupForSlug(entry.slug));
+    for (const entry of ALL_ENTRIES) groups.add(groupForSlug(entry.slug));
     for (const g of groups) {
       const specs = await loadSpecGroup(g as never);
       byGroup.set(g, new Set(specs.map((s) => s.slug)));
     }
     const missing: string[] = [];
-    for (const entry of CATALOG_ENTRIES) {
+    for (const entry of ALL_ENTRIES) {
       const g = groupForSlug(entry.slug);
       if (!byGroup.get(g)?.has(entry.slug)) missing.push(`${entry.slug} → group ${g}`);
     }

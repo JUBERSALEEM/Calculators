@@ -4,7 +4,7 @@ import { SITE_URL } from "@/lib/config";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date("2026-10-22");
-  const staticPaths = ["", "/calculators", "/all-calculators", "/about", "/privacy", "/terms"];
+  const staticPaths = ["", "/calculators", "/all-calculators", "/roadmap", "/about", "/privacy", "/terms"];
 
   const staticRoutes: MetadataRoute.Sitemap = staticPaths.map((path) => ({
     url: `${SITE_URL}${path}`,

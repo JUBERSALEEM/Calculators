@@ -13,6 +13,8 @@
  */
 
 import { CATALOG_CATEGORIES, CATALOG_ENTRIES, type CatalogEntryRaw } from "@/calculators/catalog-data";
+import { EXPANSION_ENTRIES } from "@/calculators/expansion/catalog-expansion";
+import { VERIFIED_SLUGS } from "@/calculators/verified-slugs";
 import { groupForCategoryCode, type DomainGroupId } from "@/calculators/domain-map";
 
 export interface CalculatorMeta {
@@ -46,7 +48,10 @@ function describe(entry: CatalogEntryRaw): string {
   return `${entry.name}: ${io}. ${entry.categoryLabel}.${flag}`;
 }
 
-export const CALCULATORS: CalculatorMeta[] = CATALOG_ENTRIES.map((entry) => ({
+/** Every calculator: the planned catalog plus expansion entries. */
+export const ALL_ENTRIES: CatalogEntryRaw[] = [...CATALOG_ENTRIES, ...EXPANSION_ENTRIES];
+
+export const CALCULATORS: CalculatorMeta[] = ALL_ENTRIES.map((entry) => ({
   id: entry.id,
   name: entry.name,
   slug: entry.slug,
@@ -87,7 +92,7 @@ export function getCategories(): CategoryMeta[] {
     code: c.code,
     label: c.title,
     fullLabel: c.label,
-    count: CATALOG_ENTRIES.filter((e) => e.category === c.code).length,
+    count: ALL_ENTRIES.filter((e) => e.category === c.code).length,
   }));
 }
 
@@ -106,7 +111,7 @@ export function groupForSlug(slug: string): DomainGroupId {
 
 export function statusCounts() {
   const out = { SOURCE_VERIFIED: 0, RESEARCH_REQUIRED: 0, SPECIALIST_REVIEW_REQUIRED: 0 };
-  for (const e of CATALOG_ENTRIES) out[e.formulaStatus] += 1;
+  for (const e of ALL_ENTRIES) out[e.formulaStatus] += 1;
   return out;
 }
 
@@ -117,3 +122,16 @@ export function isIndexable(meta: CalculatorMeta): boolean {
 
 export const TOTAL_CALCULATORS = CALCULATORS.length;
 export const TOTAL_CATEGORIES = CATALOG_CATEGORIES.length;
+
+/**
+ * Verification counts shown in the UI. "Verified" = asserted against independently computed
+ * values in a known-answer test (see calculators/verification.test.ts for the CSV agreement check).
+ */
+export function verificationCounts() {
+  const total = CALCULATORS.length;
+  const verified = CALCULATORS.filter((c) => VERIFIED_SLUGS.has(c.slug)).length;
+  const specialist = CALCULATORS.filter((c) => c.formulaStatus === "SPECIALIST_REVIEW_REQUIRED").length;
+  return { total, verified, specialist, smokeOnly: total - verified - specialist };
+}
+
+export const TOTAL_LABEL = TOTAL_CALCULATORS.toLocaleString("en-US");

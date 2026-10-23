@@ -1,9 +1,9 @@
-import { CALCULATORS, getCategories, statusCounts } from "@/calculators/registry";
+import { CALCULATORS, TOTAL_CATEGORIES, TOTAL_LABEL, getCategories, statusCounts } from "@/calculators/registry";
 import { CalculatorExplorer } from "@/components/calculator/explorer";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Calculator Directory — 1,248 calculators across 84 categories",
+  title: `Calculator Directory — ${TOTAL_LABEL} calculators across ${TOTAL_CATEGORIES} categories`,
   description:
     "Browse every implemented calculator, grouped by discipline. Each tool documents its formula, assumptions, limitations and source status, and runs entirely in your browser.",
   alternates: { canonical: "/calculators" },

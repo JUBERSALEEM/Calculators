@@ -13,6 +13,7 @@ import { M06_SPECS } from "@/calculators/domains/m06-industry-transport-physics"
 import { M07_SPECS } from "@/calculators/domains/m07-science-energy-earth-life";
 import { M08_SPECS } from "@/calculators/domains/m08-digital-life-sciences";
 import { M09_SPECS } from "@/calculators/domains/m09-civic-everyday";
+import { EXPANSION_SPECS } from "@/calculators/expansion/specs-expansion";
 
 export const ALL_SPECS: CalculatorSpec[] = [
   ...M01_SPECS,
@@ -24,6 +25,7 @@ export const ALL_SPECS: CalculatorSpec[] = [
   ...M07_SPECS,
   ...M08_SPECS,
   ...M09_SPECS,
+  ...EXPANSION_SPECS,
 ];
 
 export const SPEC_BY_SLUG = new Map(ALL_SPECS.map((s) => [s.slug, s]));

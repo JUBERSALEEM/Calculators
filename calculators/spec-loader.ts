@@ -13,7 +13,11 @@ const LOADERS: Record<DomainGroupId, () => Promise<CalculatorSpec[]>> = {
   4: () => import("@/calculators/domains/m04-accounting-tax-payroll-econ-mkt").then((m) => m.M04_SPECS),
   5: () => import("@/calculators/domains/m05-construction-mechanical-electrical").then((m) => m.M05_SPECS),
   6: () => import("@/calculators/domains/m06-industry-transport-physics").then((m) => m.M06_SPECS),
-  7: () => import("@/calculators/domains/m07-science-energy-earth-life").then((m) => m.M07_SPECS),
+  7: () =>
+    Promise.all([
+      import("@/calculators/domains/m07-science-energy-earth-life").then((m) => m.M07_SPECS),
+      import("@/calculators/expansion/specs-expansion").then((m) => m.EXPANSION_SPECS),
+    ]).then(([base, extra]) => [...base, ...extra]),
   8: () => import("@/calculators/domains/m08-digital-life-sciences").then((m) => m.M08_SPECS),
   9: () => import("@/calculators/domains/m09-civic-everyday").then((m) => m.M09_SPECS),
 };

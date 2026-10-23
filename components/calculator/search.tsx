@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef } from "react";
 import { SEARCH_INDEX } from "@/calculators/search-index";
+import { CATALOG_TOTAL } from "@/calculators/catalog-counts";
 import Link from "next/link";
 import { cn } from "@/components/lib/cn";
 
@@ -22,7 +23,7 @@ export function CalculatorSearch() {
     <div className="relative">
       <input
         type="search"
-        placeholder="Search 1,248 calculators…"
+        placeholder={`Search ${CATALOG_TOTAL.toLocaleString("en-US")} calculators…`}
         onFocus={() => {
           if (blurTimer.current) clearTimeout(blurTimer.current);
           setFocused(true);

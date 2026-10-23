@@ -74,7 +74,7 @@ describe("AllCalculatorsTree", () => {
     host.remove();
   });
 
-  it("Expand all shows all 1,248 calculator links", () => {
+  it("Expand all shows every calculator link", () => {
     const { host, root } = render(buildGroups());
     const expandAll = [...host.querySelectorAll("button")].find((b) => b.textContent === "Expand all")!;
     act(() => expandAll.click());

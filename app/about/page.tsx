@@ -1,3 +1,5 @@
+import { TOTAL_LABEL, TOTAL_CATEGORIES, verificationCounts } from "@/calculators/registry";
+
 export const metadata = {
   title: "About",
   description: "About Calculators — verified, privacy-first online calculators.",
@@ -32,9 +34,10 @@ export default function AboutPage() {
 
       <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-50 mt-8 mb-3">Status</h2>
       <p className="text-neutral-700 dark:text-neutral-300 mb-4">
-        All 1,248 catalog entries across 84 categories are implemented and tested. Of those, 21 have
-        formula parameters verified against an inspected authoritative source, 1,168 are standard
-        closed-form or user-parameterised calculations, and 59 are flagged for specialist review.
+        {TOTAL_LABEL} calculators across {TOTAL_CATEGORIES} categories are implemented. {verificationCounts().verified} are
+        verified by known-answer tests against independently computed values (this includes all 21 entries with
+        formula parameters verified against an inspected authoritative source). {verificationCounts().smokeOnly.toLocaleString("en-US")} are
+        smoke-tested only (finite, labelled results), and {verificationCounts().specialist} are flagged for specialist review.
       </p>
       <ul className="list-disc pl-6 text-neutral-700 dark:text-neutral-300 mb-4 space-y-2">
         <li>
