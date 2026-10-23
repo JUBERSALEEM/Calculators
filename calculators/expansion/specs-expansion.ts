@@ -569,4 +569,142 @@ export const EXPANSION_SPECS: CalculatorSpec[] = [
       );
     },
   },
+  {
+    slug: "lod-score-linkage",
+    fields: [
+      intF("R", "Recombinant offspring (R)", 2, { min: 0 }),
+      intF("NR", "Non-recombinant offspring (NR)", 18, { min: 0 }),
+      numF("theta", "Recombination fraction θ, above 0 up to 0.5", 0.1, "fraction", { gt: 0, max: 0.5 }),
+    ],
+    formulaPlain: "LOD = log₁₀ [ (1 − θ)^NR · θ^R / 0.5^(R + NR) ]",
+    variables: [
+      { symbol: "LOD", description: "Base-10 log of the odds for linkage at θ against no linkage (θ = 0.5)" },
+      { symbol: "θ", description: "Recombination fraction being tested" },
+    ],
+    assumptions: ["Offspring counts from a single backcross or a known phase; each offspring is scored independently."],
+    limitations: ["LOD ≥ 3 is the conventional threshold for linkage; a LOD of 3 is about 1000:1 odds. Use several families for a reliable map."],
+    compute: (v) => {
+      const R = Number(v.R), NR = Number(v.NR), th = Number(v.theta);
+      if (R + NR < 1) return err("Enter at least one offspring.");
+      if (R > 0 && th <= 0) return err("θ must be above 0 when there are recombinant offspring.");
+      const logOdds = NR * Math.log10(1 - th) + (R > 0 ? R * Math.log10(th) : 0) - (R + NR) * Math.log10(0.5);
+      return done([
+        outN("LOD score", logOdds, 3, "", true),
+        outN("Odds for linkage (10^LOD)", Math.pow(10, logOdds), 2, ":1"),
+      ]);
+    },
+  },
+  {
+    slug: "mutation-selection-balance",
+    fields: [
+      posF("mu", "Mutation rate to the recessive allele (μ)", 0.00001, "per allele per generation"),
+      numF("s", "Selection coefficient against the recessive homozygote (s), above 0 up to 1", 0.1, "", { gt: 0, max: 1 }),
+    ],
+    formulaPlain: "Equilibrium frequency of the recessive allele: q̂ = √(μ / s);  carriers ≈ 2q̂;  affected ≈ q̂²",
+    variables: [
+      { symbol: "q̂", description: "Equilibrium frequency of the deleterious recessive allele" },
+      { symbol: "s", description: "Fraction of recessive homozygotes lost to selection each generation" },
+    ],
+    assumptions: ["Recessive allele, random mating, no other evolutionary forces; mutation is recurrent at rate μ."],
+    limitations: ["Valid when q̂ is small (below about 0.1). Real populations also have drift, migration and dominant effects."],
+    compute: (v) => {
+      const mu = Number(v.mu), s = Number(v.s);
+      const q = Math.sqrt(mu / s);
+      return done([
+        outN("Equilibrium recessive allele frequency (q̂)", q, 6, "", true),
+        outN("Carrier frequency (2q̂)", 2 * q, 5),
+        outN("Affected frequency (q̂²)", q * q, 7),
+      ]);
+    },
+  },
+  {
+    slug: "recessive-selection-change",
+    fields: [
+      numF("q", "Current recessive allele frequency (q), 0 to 1", 0.5, "", { min: 0, max: 1 }),
+      numF("s", "Selection coefficient against the recessive homozygote (s), 0 to 1", 0.2, "", { min: 0, max: 1 }),
+    ],
+    formulaPlain: "Δq = −s·q² / (1 − s·q²);  next generation q′ = q + Δq",
+    variables: [
+      { symbol: "q", description: "Frequency of the recessive allele this generation" },
+      { symbol: "Δq", description: "Change in q in one generation (negative = the allele is being removed)" },
+    ],
+    assumptions: ["Random mating, no mutation, migration or drift; selection acts only on the recessive homozygote."],
+    limitations: ["Slows down sharply as q falls, because only the rare homozygotes are exposed to selection."],
+    compute: (v) => {
+      const q = Number(v.q), s = Number(v.s);
+      const denom = 1 - s * q * q;
+      if (denom <= 0) return err("Undefined: s·q² = 1 (every recessive homozygote is removed and q is 1).");
+      const dq = (-s * q * q) / denom;
+      return done([
+        outN("Change in q per generation (Δq)", dq, 6, "", true),
+        outN("Recessive allele frequency next generation (q′)", q + dq, 6),
+      ]);
+    },
+  },
+  {
+    slug: "migration-allele-frequency",
+    fields: [
+      numF("q", "Allele frequency in the resident population (q), 0 to 1", 0.2, "", { min: 0, max: 1 }),
+      numF("qm", "Allele frequency in the migrants (q_m), 0 to 1", 0.6, "", { min: 0, max: 1 }),
+      numF("m", "Migration rate (m), proportion of migrants per generation, 0 to 1", 0.1, "", { min: 0, max: 1 }),
+    ],
+    formulaPlain: "q′ = (1 − m)·q + m·q_m;  Δq = q′ − q",
+    variables: [
+      { symbol: "q′", description: "Allele frequency in the resident population after one generation of migration" },
+      { symbol: "m", description: "Proportion of the next generation made up of migrants" },
+    ],
+    assumptions: ["Migrants arrive each generation with a fixed allele frequency; the migrant pool is much larger than the resident pool."],
+    limitations: ["Ignores selection, drift and mating structure; it describes one generation only."],
+    compute: (v) => {
+      const q = Number(v.q), qm = Number(v.qm), m = Number(v.m);
+      const next = (1 - m) * q + m * qm;
+      return done([
+        outN("Allele frequency after migration (q′)", next, 6, "", true),
+        outN("Change in q (Δq)", next - q, 6),
+      ]);
+    },
+  },
+  {
+    slug: "heterozygosity-drift-decay",
+    fields: [
+      numF("H0", "Starting heterozygosity (H₀), 0 to 1", 0.5, "", { min: 0, max: 1 }),
+      posF("Ne", "Effective population size (Ne), at least 1", 50, "individuals", { min: 1 }),
+      intF("t", "Generations (t)", 10, { min: 0 }),
+    ],
+    formulaPlain: "H_t = H₀ · (1 − 1 / (2·Ne))^t",
+    variables: [
+      { symbol: "H_t", description: "Expected heterozygosity after t generations of random drift" },
+      { symbol: "Ne", description: "Effective population size" },
+    ],
+    assumptions: ["Random genetic drift only: no mutation, migration or selection; Wright–Fisher model."],
+    limitations: ["Gives the expected value; any single population can lose heterozygosity faster or slower by chance."],
+    compute: (v) => {
+      const H0 = Number(v.H0), Ne = Number(v.Ne), t = Number(v.t);
+      const Ht = H0 * Math.pow(1 - 1 / (2 * Ne), t);
+      return done([
+        outN("Expected heterozygosity after t generations (H_t)", Ht, 5, "", true),
+        outN("Proportion of heterozygosity lost", H0 === 0 ? 0 : (1 - Ht / H0) * 100, 2, "%"),
+      ]);
+    },
+  },
+  {
+    slug: "coefficient-of-relationship",
+    fields: [
+      intF("k", "Number of relationship paths (k)", 2, { min: 1 }),
+      intF("n", "Number of links in each path (n)", 4, { min: 1 }),
+    ],
+    formulaPlain: "Wright's coefficient of relationship: r = Σ (½)^n, summed over the k paths of length n",
+    variables: [
+      { symbol: "r", description: "Probability that two relatives share an allele identical by descent at a random locus" },
+      { symbol: "n", description: "Number of parent–child links along the path joining the two relatives" },
+    ],
+    assumptions: ["All paths have the same length and the common ancestors are not themselves inbred."],
+    limitations: ["Examples: parent–child r = 0.5 (k = 1, n = 1); full siblings r = 0.5 (k = 2, n = 2); first cousins r = 0.125 (k = 2, n = 4)."],
+    compute: (v) => {
+      const k = Number(v.k), n = Number(v.n);
+      return done([
+        outN("Coefficient of relationship (r)", k * Math.pow(0.5, n), 6, "", true),
+      ]);
+    },
+  },
 ];

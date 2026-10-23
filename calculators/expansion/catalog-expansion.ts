@@ -99,4 +99,36 @@ const BATCH2: CatalogEntryRaw[] = [
     "GPP, respiration -> NPP, efficiency", "Simple", ["trophic-transfer-efficiency", "species-area-relationship"]),
 ];
 
-export const EXPANSION_ENTRIES: CatalogEntryRaw[] = [...BATCH1, ...BATCH2];
+
+function entryN(
+  id: string,
+  name: string,
+  slug: string,
+  cat: { category: string; categoryLabel: string },
+  inputsOutputs: string,
+  complexity: CatalogEntryRaw["complexity"],
+  related: string[],
+): CatalogEntryRaw {
+  return {
+    ...entry(id, name, slug, cat, inputsOutputs, complexity, related),
+    note: "Standard textbook formula; known-answer tested in calculators/known-answers-expansion-batch3.test.ts.",
+  };
+}
+
+// Batch 3: genetics calculators (CALC-1271 to 1276).
+const BATCH3: CatalogEntryRaw[] = [
+  entryN("CALC-1271", "LOD Score for Linkage", "lod-score-linkage", BIO, 
+    "recombinant and non-recombinant offspring, θ -> LOD", "Moderate", ["recombination-map-distance", "hardy-weinberg"]),
+  entryN("CALC-1272", "Mutation–Selection Balance", "mutation-selection-balance", BIO, 
+    "mutation rate, selection coefficient -> q̂, carriers", "Moderate", ["hardy-weinberg", "effective-population-size"]),
+  entryN("CALC-1273", "Selection Against a Recessive Allele", "recessive-selection-change", BIO, 
+    "q, s -> Δq per generation", "Simple", ["mutation-selection-balance", "hardy-weinberg"]),
+  entryN("CALC-1274", "Allele Frequency After Migration", "migration-allele-frequency", BIO, 
+    "resident and migrant frequencies, rate -> q′", "Simple", ["recessive-selection-change", "effective-population-size"]),
+  entryN("CALC-1275", "Heterozygosity Loss by Genetic Drift", "heterozygosity-drift-decay", BIO, 
+    "H₀, Ne, generations -> H_t", "Simple", ["effective-population-size", "inbreeding-coefficient-path"]),
+  entryN("CALC-1276", "Coefficient of Relationship", "coefficient-of-relationship", BIO, 
+    "paths and links -> r", "Simple", ["inbreeding-coefficient-path", "hardy-weinberg"]),
+];
+
+export const EXPANSION_ENTRIES: CatalogEntryRaw[] = [...BATCH1, ...BATCH2, ...BATCH3];

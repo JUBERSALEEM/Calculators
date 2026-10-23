@@ -81,4 +81,10 @@ export const VERIFIED_SLUGS: ReadonlySet<string> = new Set<string>([
   "trophic-transfer-efficiency",
   "lotka-volterra-equilibrium",
   "net-primary-productivity",
+  "lod-score-linkage",
+  "mutation-selection-balance",
+  "recessive-selection-change",
+  "migration-allele-frequency",
+  "heterozygosity-drift-decay",
+  "coefficient-of-relationship",
 ]);

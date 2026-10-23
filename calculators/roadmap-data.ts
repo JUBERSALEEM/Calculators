@@ -62,7 +62,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
       "Animal energy: maintenance energy requirement (published equations, cited)",
     ],
     targetAdded: 150,
-    addedSoFar: 16,
+    addedSoFar: 22,
     gate: ENTRY_GATE + " Animal dosing or clinical use is out of scope: those become SPECIALIST_REVIEW_REQUIRED.",
   },
   {
@@ -94,7 +94,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
     title: "Specialist-review tools",
     status: "gated",
     goal: "Keep building-code, clinical, statutory and licensed-table calculators behind a specialist review. They are never marked verified without licensed data and sign-off.",
-    scope: ["59 specialist-review entries", "Excluded from the sitemap and marked noindex"],
+    scope: ["Specialist-review entries (count shown in the progress cards above), including clinical formulas such as serum osmolality", "Excluded from the sitemap and marked noindex"],
     targetAdded: null,
     addedSoFar: 0,
     gate: "Licensed source and qualified reviewer sign-off recorded in the catalog; otherwise the tool stays flagged.",

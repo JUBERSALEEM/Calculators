@@ -49,7 +49,7 @@ export default function AboutPage() {
           arithmetic. The formula is printed in full on each page with its assumptions and limits.
         </li>
         <li>
-          <strong>Specialist review pending (59).</strong> Building-code tables, licensed standards
+          <strong>Specialist review pending ({verificationCounts().specialist}).</strong> Building-code tables, licensed standards
           (NEC, NFPA, ACI, ASCE, ASTM, ISO), pediatric growth references and clinical dosing. No
           licensed table or clinical claim is embedded: regulated values are inputs you supply, the
           page carries a review banner, and the tool is excluded from the sitemap.

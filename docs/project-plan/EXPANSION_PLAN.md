@@ -31,10 +31,10 @@ These counts are used only to size the gap. No formulas were copied from these s
 |-------|------|--------|-------------------|
 | P0 | Baseline catalog (1,248 entries, 84 categories) | Complete | — |
 | P1 | Biology and ecology batch 1: allele frequency, Shannon and Simpson diversity, Lincoln–Petersen, net reproductive rate, Jaccard and Sørensen | Complete (6 added, all verified) | 6 |
-| P2 | Life sciences, lab and animal calculators: linkage, inbreeding, osmolarity, plate dilutions, species–area, maintenance energy (published equations) | In progress: batch 2 added 16 (CALC-1255–1270); animal energy not started | ~150 (estimate) |
+| P2 | Life sciences, lab and animal calculators: linkage, inbreeding, osmolarity, plate dilutions, species–area, maintenance energy (published equations) | In progress: batch 2 added 16 (CALC-1255–1270); batch 3 added 6 genetics (CALC-1271–1276); animal energy not started | ~150 (estimate) |
 | P3 | Verify the planned catalog: known-answer tests for every closed-form RESEARCH_REQUIRED entry, starting with C01–C16 | Planned | — |
 | P4 | Expansion to about 4,000: unit-pair converters, domain variants with distinct inputs, remaining everyday and environmental calculators | Planned | ~2,700 (estimate) |
-| P5 | Specialist-review tools (59) | Gated | — |
+| P5 | Specialist-review tools (60) | Gated | — |
 
 The P2 and P4 numbers are planning estimates. Actual additions depend on which candidates pass the gate.
 
@@ -57,10 +57,10 @@ The P2 and P4 numbers are planning estimates. Actual additions depend on which c
 5. Run typecheck, tests, lint and the production build. Regenerate `verified-slugs.ts` from the test files.
 6. Update `roadmap-data.ts` counts only if the phase changes.
 
-## 6. Current state (after batch 2)
+## 6. Current state (after batch 3)
 
-- 1,270 calculators implemented (1,248 baseline + 22 expansion: batch 1 = 6, batch 2 = 16).
-- 80 verified by known-answer tests (58 baseline + 22 expansion).
-- 1,131 smoke-tested only; 59 specialist review.
-- Balance to the 4,000 target: 2,730 calculators.
+- 1,276 calculators implemented (1,248 baseline + 28 expansion: batch 1 = 6, batch 2 = 16, batch 3 = 6).
+- 86 verified by known-answer tests (58 baseline + 28 expansion).
+- 1,130 smoke-tested only; 60 specialist review (serum osmolality moved here from research-required).
+- Balance to the 4,000 target: 2,724 calculators.
 - All 21 source-verified entries are verified.

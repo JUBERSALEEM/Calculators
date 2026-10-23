@@ -4,17 +4,17 @@ Production-ready web calculator foundation built with Next.js 15 App Router, Typ
 
 ## Implemented Calculators
 
-**All 1,270 catalog entries across 84 categories are implemented** (1,248 baseline plus 22 from expansion batches 1 and 2; see `docs/project-plan/EXPANSION_PLAN.md` and the live `/roadmap` page). 80 are independently verified by known-answer tests (`calculators/reference-values.test.ts`, `calculators/known-answers-*.test.ts`, `calculators/known-answers-expansion*.test.ts`), including all 21 source-verified entries; the other entries are smoke-tested (defaults and perturbed inputs produce finite, labelled results) but their formulas have not yet been checked against independent reference values.
+**All 1,276 catalog entries across 84 categories are implemented** (1,248 baseline plus 28 from expansion batches 1–3; see `docs/project-plan/EXPANSION_PLAN.md` and the live `/roadmap` page). 86 are independently verified by known-answer tests (`calculators/reference-values.test.ts`, `calculators/known-answers-*.test.ts`, `calculators/known-answers-expansion*.test.ts`), including all 21 source-verified entries; the other entries are smoke-tested (defaults and perturbed inputs produce finite, labelled results) but their formulas have not yet been checked against independent reference values.
 
 | Cohort | Entries | Implementation |
 | --- | --- | --- |
 | `SOURCE_VERIFIED` | 21 | Formula parameters verified against the inspected authoritative source cited on each page (NIST SP 811, FAO-56, NOAA/NWS, CDC, SSA, IRS, US DOL, CFPB Reg Z, W3C WCAG 2.2). |
-| `RESEARCH_REQUIRED` | 1,190 | Standard closed-form, engineering or user-parameterised arithmetic. Every formula is printed on the page with its variables, assumptions and limitations. |
-| `SPECIALIST_REVIEW_REQUIRED` | 59 | Code-governed, licensed-table or clinically-gated tools (building codes, NEC, ACI/ASCE, pediatric LMS, prescribing). **No licensed table or clinical claim is embedded** — every regulated constant is a user input, the page carries a specialist-review banner, and the tool is excluded from `sitemap.xml` and marked `noindex`. |
-| **Total** | **1,270** | — |
+| `RESEARCH_REQUIRED` | 1,195 | Standard closed-form, engineering or user-parameterised arithmetic. Every formula is printed on the page with its variables, assumptions and limitations. |
+| `SPECIALIST_REVIEW_REQUIRED` | 60 | Code-governed, licensed-table or clinically-gated tools (building codes, NEC, ACI/ASCE, pediatric LMS, prescribing). **No licensed table or clinical claim is embedded** — every regulated constant is a user input, the page carries a specialist-review banner, and the tool is excluded from `sitemap.xml` and marked `noindex`. |
+| **Total** | **1,276** | — |
 
-`docs/project-plan/catalog.csv` records `Verified (known-answer tested)` for 80 entries, `Implemented (smoke-tested; formula not independently verified)` for 1,131 entries, and
-`Implemented (parametric; specialist review pending)` for the 59 specialist-gated
+`docs/project-plan/catalog.csv` records `Verified (known-answer tested)` for 86 entries, `Implemented (smoke-tested; formula not independently verified)` for 1,130 entries, and
+`Implemented (parametric; specialist review pending)` for the 60 specialist-gated
 entries. No `formula_status` was upgraded without an inspected source.
 
 ### Architecture
@@ -36,7 +36,7 @@ entries. No `formula_status` was upgraded without an inspected source.
 
 ### Test coverage
 
-`calculators/engine.test.ts` verifies, for **every** one of the 1,270 specs:
+`calculators/engine.test.ts` verifies, for **every** one of the 1,276 specs:
 
 1. exactly one spec per catalog slug (no gaps, no duplicates);
 2. unique field keys, non-empty formula and variables;

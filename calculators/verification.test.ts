@@ -56,7 +56,7 @@ describe("catalog.csv ↔ code agreement", () => {
 
   it("specialist-review entries are never marked verified", () => {
     const specialist = csv.filter((r) => r.formula_status === "SPECIALIST_REVIEW_REQUIRED");
-    expect(specialist.length).toBe(59);
+    expect(specialist.length).toBe(60);
     expect(specialist.filter((r) => VERIFIED_SLUGS.has(r.slug))).toEqual([]);
   });
 });

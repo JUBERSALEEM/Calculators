@@ -19487,7 +19487,7 @@ export const CATALOG_ENTRIES: CatalogEntryRaw[] = [
     "inputsOutputs": "Na, glucose, BUN -> osmolality",
     "complexity": "Moderate",
     "priority": "P3",
-    "formulaStatus": "RESEARCH_REQUIRED",
+    "formulaStatus": "SPECIALIST_REVIEW_REQUIRED",
     "note": "",
     "intent": "calculate",
     "sources": [],
