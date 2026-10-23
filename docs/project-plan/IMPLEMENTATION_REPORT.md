@@ -1,5 +1,5 @@
 # Implementation report — all 1,248 catalog calculators
-Generated 2026-10-22. Source of truth: `docs/project-plan/catalog.csv` (now 1,189 `Implemented` + 59 `Implemented (parametric; specialist review pending)`).
+Generated 2026-10-22. Source of truth: `docs/project-plan/catalog.csv` (updated: 37 `Verified (known-answer tested)` + 1,152 `Implemented (smoke-tested; formula not independently verified)` + 59 `Implemented (parametric; specialist review pending)`). This report predates that status correction.
 
 ## Headline
 | Metric | Before | After |

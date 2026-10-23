@@ -5,8 +5,9 @@
  * 84 categories). Each entry maps to exactly one executable spec in
  * calculators/domains/*, loaded lazily per discipline.
  *
- * status "Implemented" means an executable, unit-tested spec exists in this
- * repository. It is NOT a claim that formula_status has been upgraded: the
+ * status "Implemented" means an executable spec exists in this repository and
+ * passes the smoke tests (finite, labelled results). It does NOT mean the formula
+ * has been independently verified; see docs/project-plan/catalog.csv for that. It is NOT a claim that formula_status has been upgraded: the
  * catalog's formula_status is preserved verbatim from the research log, and
  * SPECIALIST_REVIEW_REQUIRED tools stay flagged in the UI.
  */
