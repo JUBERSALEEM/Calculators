@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    include: ["lib/**/*.test.ts", "calculators/**/*.test.ts", "components/**/*.test.ts"],
+    include: ["lib/**/*.test.{ts,tsx}", "calculators/**/*.test.{ts,tsx}", "components/**/*.test.{ts,tsx}"],
     exclude: ["node_modules", ".next", "out", "tests/e2e"],
   },
   resolve: {

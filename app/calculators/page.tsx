@@ -24,9 +24,12 @@ export default function DirectoryPage() {
     <div className="container-page">
       <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-50 mb-2">Calculator directory</h1>
       <p className="text-neutral-600 dark:text-neutral-400 mb-4 max-w-3xl">
-        {CALCULATORS.length.toLocaleString("en-US")} working calculators across {categories.length} categories.
-        Every entry is implemented, unit-tested against its own worked example, and documented with its formula,
-        assumptions and limitations.
+        {CALCULATORS.length.toLocaleString("en-US")} working calculators across {categories.length} categories.{" "}
+        <Link href="/all-calculators" className="text-brand-600 dark:text-brand-400 hover:underline">
+          View the full list by category
+        </Link>.
+        Every entry is implemented and documented with its formula, assumptions and limitations. Only the entries
+        marked as known-answer tested in the catalog are checked against independent reference values.
       </p>
       <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-8">
         Source status: {counts.SOURCE_VERIFIED} verified against an inspected authoritative source ·{" "}
